@@ -1,11 +1,20 @@
 <script setup>
-
+import Timer from '../components/Timer.vue'
 </script>
 
 <template>
-  <h1>Home</h1>
+  <main>
+    <Timer />
+  </main>
 </template>
 
 <style lang="scss">
-@use '../assets/variables';
+@import '../assets/variables';
+
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 100px;
+}
 </style>

@@ -18,7 +18,7 @@ function toggleNavbar() {
   <header>
     <nav>
       <div class="logo">
-        <a href="#">Meu Pomodoro</a>
+        <a href="#">Seu Pomodoro</a>
       </div>
 
       <div class="mobilebar" @click="toggleNavbar">
@@ -52,7 +52,7 @@ function toggleNavbar() {
 header {
   height: 80px;
   background-color: #222222;
-  border-bottom: 1px solid $txt-gray;
+  border-bottom: 1px solid white;
 
   nav {
     display: flex;
@@ -87,8 +87,9 @@ header {
         align-items: center;
         justify-content: center;
         flex-direction: column;
-        gap: 0;
         position: absolute;
+        z-index: 9999;
+        gap: 0;
         top: 80px;
         left: 0;
         background-color: #333333;
@@ -98,13 +99,13 @@ header {
 
       &__routes {
         @include textNone($txt-gray);
-        padding: 28px 5px;
+        padding: 26px 5px;
         transition: .1s;
 
 
         border: {
-          top: 2px solid #222222;
-          bottom: 2px solid #222222;
+          top: 4px solid #222222;
+          bottom: 4px solid #222222;
         }
 
         @include mq(m) {
@@ -112,14 +113,14 @@ header {
           text-align: center;
 
           border: {
-            top: 2px solid #333333;
-            bottom: 2px solid #333333;
+            top: 4px solid #333333;
+            bottom: 4px solid #333333;
           }
         }
 
         &:hover {
           color: white;
-          border-bottom: 2px solid bisque;
+          border-bottom: 4px solid bisque;
         }
 
         @include mq(m) {
@@ -151,7 +152,7 @@ header {
       &__signup {
 
         a {
-          @include txtUser(rgb(141, 93, 38));
+          @include txtUser(rgb(141, 103, 58));
           border-radius: 8px;
           background-color: bisque;
           padding: 10px;
