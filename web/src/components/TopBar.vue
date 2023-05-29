@@ -72,12 +72,16 @@ header {
         font-weight: 500;
         text-transform: uppercase;
         @include textNone(white);
+        background: linear-gradient(to right, white, bisque);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
       }
     }
 
     .navbar {
       display: flex;
-      gap: 20px;
+      gap: 15px;
 
       @include mq(m) {
         align-items: center;
@@ -88,13 +92,35 @@ header {
         top: 80px;
         left: 0;
         background-color: #333333;
-        width: 400px;
-        height: 500px;
+        width: 300px;
         transform: translateX(-100%)
       }
 
       &__routes {
         @include textNone($txt-gray);
+        padding: 28px 5px;
+        transition: .1s;
+
+
+        border: {
+          top: 2px solid #222222;
+          bottom: 2px solid #222222;
+        }
+
+        @include mq(m) {
+          width: 100%;
+          text-align: center;
+
+          border: {
+            top: 2px solid #333333;
+            bottom: 2px solid #333333;
+          }
+        }
+
+        &:hover {
+          color: white;
+          border-bottom: 2px solid bisque;
+        }
 
         @include mq(m) {
           color: white;
