@@ -1,0 +1,22 @@
+@import "variables";
+
+// Breakpoints
+@mixin mq($value) {
+  $size: map-get($breakpoints, $value);
+  @media (max-width: $size) {
+    @content;
+  }
+}
+
+@mixin textNone($color) {
+  text-decoration: none;
+  color: $color;
+}
+
+@mixin txtUser($color) {
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  text-transform: uppercase;
+  color: $color;
+}
