@@ -28,9 +28,12 @@ function toggleNavbar() {
       </div>
 
       <div class="navbar" :class="navbar">
-        <RouterLink to="/" class="navbar__routes">Home</RouterLink>
-        <RouterLink to="/pomodoro" class="navbar__routes">Entenda mais</RouterLink>
-        <RouterLink to="/sobre" class="navbar__routes">Quem somos</RouterLink>
+        <div class="navbar__content">
+          <RouterLink to="/" class="navbar__routes">Home</RouterLink>
+          <RouterLink to="/pomodoro" class="navbar__routes">Saiba mais</RouterLink>
+          <RouterLink to="/sobre" class="navbar__routes">Quem somos</RouterLink>
+        </div>
+        <div class="navbar__blur" @click="toggleNavbar"></div>
       </div>
 
       <div class="user">
@@ -80,28 +83,36 @@ header {
     }
 
     .navbar {
-      display: flex;
-      gap: 15px;
+      &__content {
+        display: flex;
+        gap: 15px;
+
+        @include mq(m) {
+          flex-direction: column;
+          gap: 0;
+        }
+      }
 
       @include mq(m) {
-        align-items: center;
-        justify-content: center;
-        flex-direction: column;
+        display: grid;
+        grid-template-columns: 70% 30%;
         position: absolute;
         z-index: 9999;
-        gap: 0;
         top: 80px;
         left: 0;
-        background-color: #333333;
-        width: 300px;
-        transform: translateX(-100%)
+        width: 100%;
+        height: 100%;
+        transform: translateX(-100%);
+
+        &__content {
+          background-color: #222;
+        }
       }
 
       &__routes {
         @include textNone($txt-gray);
         padding: 26px 5px;
         transition: .1s;
-
 
         border: {
           top: 4px solid #222222;
@@ -113,8 +124,8 @@ header {
           text-align: center;
 
           border: {
-            top: 4px solid #333333;
-            bottom: 4px solid #333333;
+            top: 4px solid #222;
+            bottom: 4px solid #222;
           }
         }
 
@@ -135,7 +146,9 @@ header {
     }
 
     .navbar--active {
-      transform: translateX(0);
+      animation-name: slide-bar;
+      animation-duration: .3s;
+      animation-fill-mode: forwards;
     }
 
     .user {
@@ -171,6 +184,8 @@ header {
       @include mq(m) {
         display: flex;
         flex-direction: column;
+        justify-content: center;
+        align-items: center;
         gap: 6px;
       }
 
