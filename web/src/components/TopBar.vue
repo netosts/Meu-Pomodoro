@@ -21,10 +21,15 @@ function toggleNavbar() {
         <a href="#">Seu Pomodoro</a>
       </div>
 
-      <div class="mobilebar" @click="toggleNavbar">
-        <div class="line__1"></div>
-        <div class="line__2"></div>
-        <div class="line__3"></div>
+      <div class="mobilebox">
+        <div class="mobilebar" @click="toggleNavbar">
+          <div class="line__1"></div>
+          <div class="line__2"></div>
+          <div class="line__3"></div>
+        </div>
+        <a href="#" class="mobilelogo">
+          <img src="/seu-pomodoro-icon.png" alt="seu pomodoro icon">
+        </a>
       </div>
 
       <div class="navbar" :class="navbar">
@@ -165,19 +170,34 @@ header {
       }
     }
 
-    .mobilebar {
+    .mobilebox {
       display: none;
 
       @include mq(m) {
         display: flex;
-        flex-direction: column;
-        gap: 6px;
+        align-items: center;
+        gap: 15px;
       }
 
-      div {
-        width: 26px;
-        height: 2px;
-        background-color: white;
+      .mobilebar {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+
+        div {
+          width: 26px;
+          height: 2px;
+          background-color: white;
+        }
+      }
+
+      .mobilelogo {
+        display: flex;
+        justify-content: center;
+
+        img {
+          width: 50px;
+        }
       }
     }
   }

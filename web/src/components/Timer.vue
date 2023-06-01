@@ -3,80 +3,111 @@ import { ref, watchEffect } from 'vue';
 import { setTimeout, setInterval, clearInterval } from 'worker-timers';
 
 
+// get the main and breath timers
 const mainTimer = ref(0);
 const breathTimer = ref(0);
-const mainRemainingTime = ref(1500); // 1800 seconds = 30 minutes
+
+// set the main and breath timers remain times
+const mainRemainingTime = ref(1500); // 1500 seconds = 25 minutes
 const breathRemainingTime = ref(300); // 300 seconds = 5 minutes
+
+// get the timers active booleans for conditional interactions
 const isTimerActive = ref(false);
 const isMainActive = ref(false);
 const isBreathActive = ref(false);
+
+// set an ID for the setInterval function
 let intervalId = null;
+
+// get the turn counter
+const turnCount = ref(1);
 
 
 // Notification functions
 function askPermission() {
+  // check if the browser supports desktop notifications
   if ('Notification' in window) {
     if (Notification.permission !== 'granted') {
       Notification.requestPermission();
     }
   } else {
+    // if the browser doesn't support desktop notifications, send an alert to the user
     alert('Esse browser não suporta notificações desktop!');
   }
 };
 
 function sendNotification() {
-  const notification = new Notification('Seu Pomodoro', {
-    body: 'Descanso. Clique para adicionar 5 minutos!',
-  })
+  // Notification options and send the notification
+  const options = {
+    body: `Rodada #${turnCount.value} - ${isMainActive.value ? 'BREATH - Clique para adicionar 5 minutos de FOCUS' : 'FOCUS'}`,
+    icon: '/seu-pomodoro-icon.png',
+  }
+  const notification = new Notification('Seu Pomodoro', options)
+  // notification closes after 10 seconds
   setTimeout(() => {
     notification.close();
-  }, 5000);
+  }, 10 * 1000);
+  // add 5 minutes to main timer
   notification.onclick = (event) => {
     event.preventDefault();
-    mainRemainingTime.value = 300;
-    isBreathActive.value = false;
+    if (mainRemainingTime.value === 0) {
+      mainRemainingTime.value = 300;
+      isBreathActive.value = false;
+    }
   }
 };
 
 
 // Timer functions
 function startTimer() {
+  // check if user has not granted permission for notification <- IMPORTANT
+  // if not, alert the user and ask for permission
   if (Notification.permission !== 'granted') {
     alert('Notificação desativada! Lembre de ativar para ser avisado sobre o pomodoro <-');
     askPermission();
   }
+  // this is the timer function with web worker setInterval
   intervalId = setInterval(() => {
     if (mainRemainingTime.value > 1) {
       mainRemainingTime.value--;
       isMainActive.value = true;
     } else if (mainRemainingTime.value === 1) {
-      sendNotification();
+      sendNotification(); // notify user that breath time has begun
       mainRemainingTime.value--;
     } else if (breathRemainingTime.value > 0) {
       breathRemainingTime.value--;
       isMainActive.value = false;
       isBreathActive.value = true;
     } else {
-      stopTimer();
+      resetTimer();
+      sendNotification(); // notify user that focus time has begun
     }
-  }, 1000);
+  }, 10);
   isTimerActive.value = true;
 };
 
 function stopTimer() {
-  clearInterval(intervalId);
+  clearInterval(intervalId); // pauses interval
   isTimerActive.value = false;
   isMainActive.value = false;
   isBreathActive.value = false;
 };
 
-function resetTimer() {
-  clearInterval(intervalId);
+function resetTimer() { // soft reset for new turn
+  mainRemainingTime.value = 1500;
+  breathRemainingTime.value = 300;
+  isMainActive.value = false;
+  isBreathActive.value = false;
+  turnCount.value++;
+}
+
+function hardResetTimer() { // hard reset to restart timer and turns
   mainRemainingTime.value = 1500;
   breathRemainingTime.value = 300;
   isTimerActive.value = false;
   isMainActive.value = false;
   isBreathActive.value = false;
+  turnCount.value = 1;
 }
 
 watchEffect(() => {
@@ -94,6 +125,7 @@ watchEffect(() => {
 
 <template>
   <section>
+    <h1 class="timer__title">Rodada # {{ turnCount }}</h1>
     <div class="timer">
       <h2 class="timer__main" :id="isMainActive ? 'timer__main--active' : null">
         {{ mainTimer }}
@@ -109,7 +141,7 @@ watchEffect(() => {
       <button class="btn__stop" v-show="isTimerActive" @click="stopTimer">
         Pause <font-awesome-icon icon="fa-solid fa-pause" />
       </button>
-      <button class="btn__reset" @click="resetTimer">
+      <button class="btn__reset" @click="hardResetTimer">
         <font-awesome-icon icon="fa-solid fa-rotate" flip="horizontal" size="2xl" style="color: #333" />
       </button>
     </div>
@@ -119,6 +151,15 @@ watchEffect(() => {
 <style lang="scss" scoped>
 @import '../assets/variables';
 @import '../assets/mixins';
+
+
+.timer__title {
+  font-family: 'Pacifico';
+  font-size: 2rem;
+  font-weight: 900;
+  padding: 5px 50px;
+  color: #444444;
+}
 
 .timer {
   display: flex;
