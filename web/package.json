@@ -12,7 +12,8 @@
     "@fortawesome/free-solid-svg-icons": "^6.4.0",
     "@fortawesome/vue-fontawesome": "^3.0.3",
     "vue": "^3.3.2",
-    "vue-router": "^4.2.0"
+    "vue-router": "^4.2.0",
+    "worker-timers": "^7.0.69"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.2.3",

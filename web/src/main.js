@@ -12,6 +12,7 @@ const app = createApp(App)
 
 app.use(router)
 
+// Add Font Awesome icons
 library.add(faRotate, faPause, faPlay)
 app.component('font-awesome-icon', FontAwesomeIcon)
 

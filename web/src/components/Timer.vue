@@ -1,22 +1,57 @@
 <script setup>
-import { ref, watchEffect, computed } from 'vue';
+import { ref, watchEffect } from 'vue';
+import { setTimeout, setInterval, clearInterval } from 'worker-timers';
 
 
 const mainTimer = ref(0);
 const breathTimer = ref(0);
-const mainRemainingTime = ref(10); // 1800 seconds = 30 minutes
-const breathRemainingTime = ref(10); // 300 seconds = 5 minutes
-let intervalId = null;
+const mainRemainingTime = ref(1500); // 1800 seconds = 30 minutes
+const breathRemainingTime = ref(300); // 300 seconds = 5 minutes
 const isTimerActive = ref(false);
 const isMainActive = ref(false);
 const isBreathActive = ref(false);
+let intervalId = null;
 
 
+// Notification functions
+function askPermission() {
+  if ('Notification' in window) {
+    if (Notification.permission !== 'granted') {
+      Notification.requestPermission();
+    }
+  } else {
+    alert('Esse browser não suporta notificações desktop!');
+  }
+};
+
+function sendNotification() {
+  const notification = new Notification('Seu Pomodoro', {
+    body: 'Descanso. Clique para adicionar 5 minutos!',
+  })
+  setTimeout(() => {
+    notification.close();
+  }, 5000);
+  notification.onclick = (event) => {
+    event.preventDefault();
+    mainRemainingTime.value = 300;
+    isBreathActive.value = false;
+  }
+};
+
+
+// Timer functions
 function startTimer() {
+  if (Notification.permission !== 'granted') {
+    alert('Notificação desativada! Lembre de ativar para ser avisado sobre o pomodoro <-');
+    askPermission();
+  }
   intervalId = setInterval(() => {
-    if (mainRemainingTime.value > 0) {
+    if (mainRemainingTime.value > 1) {
       mainRemainingTime.value--;
       isMainActive.value = true;
+    } else if (mainRemainingTime.value === 1) {
+      sendNotification();
+      mainRemainingTime.value--;
     } else if (breathRemainingTime.value > 0) {
       breathRemainingTime.value--;
       isMainActive.value = false;
@@ -46,18 +81,14 @@ function resetTimer() {
 
 watchEffect(() => {
   // Show main timer on screen
-  const mainMinutes = Math.floor(mainRemainingTime.value / 60);
-  const formattedMainMinutes = mainMinutes.toString().padStart(2, '0'); // Show minutes as two numbers always
-  const mainSeconds = mainRemainingTime.value % 60;
-  const formattedMainSeconds = mainSeconds.toString().padStart(2, '0'); // Show seconds as two numbers always
-  mainTimer.value = `${formattedMainMinutes}:${formattedMainSeconds}`;
+  const mainMinutes = Math.floor(mainRemainingTime.value / 60).toString().padStart(2, '0'); // Show minutes as two numbers always
+  const mainSeconds = (mainRemainingTime.value % 60).toString().padStart(2, '0'); // Show seconds as two numbers always
+  mainTimer.value = `${mainMinutes}:${mainSeconds}`;
 
   // Show breath timer on screen
-  const breathMinutes = Math.floor(breathRemainingTime.value / 60);
-  const formattedBreathMinutes = breathMinutes.toString().padStart(2, '0'); // Show minutes as two numbers always
-  const breathSeconds = breathRemainingTime.value % 60;
-  const formattedBreathSeconds = breathSeconds.toString().padStart(2, '0'); // Show seconds as two numbers always
-  breathTimer.value = `${formattedBreathMinutes}:${formattedBreathSeconds}`;
+  const breathMinutes = Math.floor(breathRemainingTime.value / 60).toString().padStart(2, '0'); // Show minutes as two numbers always
+  const breathSeconds = (breathRemainingTime.value % 60).toString().padStart(2, '0'); // Show seconds as two numbers always
+  breathTimer.value = `${breathMinutes}:${breathSeconds}`;
 });
 </script>
 
@@ -73,10 +104,10 @@ watchEffect(() => {
     </div>
     <div class="btn">
       <button class="btn__start" v-show="!isTimerActive" @click="startTimer">
-        Start <font-awesome-icon icon="fa-solid fa-play" size="l" />
+        Start <font-awesome-icon icon="fa-solid fa-play" />
       </button>
       <button class="btn__stop" v-show="isTimerActive" @click="stopTimer">
-        Pause <font-awesome-icon icon="fa-solid fa-pause" size="l" />
+        Pause <font-awesome-icon icon="fa-solid fa-pause" />
       </button>
       <button class="btn__reset" @click="resetTimer">
         <font-awesome-icon icon="fa-solid fa-rotate" flip="horizontal" size="2xl" style="color: #333" />
@@ -98,12 +129,12 @@ watchEffect(() => {
     background-color: $main-btn;
     font-size: 120px;
     @include userNone();
-    transition: 6s;
+    transition: .5s;
   }
 
   &__breath {
     @include timerBox(350px, 200px, 100);
-    transition: 6s;
+    transition: .5s;
 
     margin: {
       top: 30px;
@@ -131,6 +162,7 @@ watchEffect(() => {
 
 .btn {
   display: flex;
+  align-items: center;
   gap: 15px;
 
   margin: {
