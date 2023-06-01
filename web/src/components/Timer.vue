@@ -43,6 +43,7 @@ function sendNotification() {
     icon: '/seu-pomodoro-icon.png',
   }
   const notification = new Notification('Seu Pomodoro', options)
+  new Audio("/triangle-open.mp3").play();
   // notification closes after 10 seconds
   setTimeout(() => {
     notification.close();
@@ -82,7 +83,7 @@ function startTimer() {
       resetTimer();
       sendNotification(); // notify user that focus time has begun
     }
-  }, 10);
+  }, 1000);
   isTimerActive.value = true;
 };
 
