@@ -33,9 +33,12 @@ function toggleNavbar() {
       </div>
 
       <div class="navbar" :class="navbar">
-        <RouterLink to="/" class="navbar__routes">Home</RouterLink>
-        <RouterLink to="/pomodoro" class="navbar__routes">Entenda mais</RouterLink>
-        <RouterLink to="/sobre" class="navbar__routes">Quem somos</RouterLink>
+        <div class="navbar__content">
+          <RouterLink to="/" class="navbar__content__routes">Home</RouterLink>
+          <RouterLink to="/pomodoro" class="navbar__content__routes">Saiba mais</RouterLink>
+          <RouterLink to="/sobre" class="navbar__content__routes">Quem somos</RouterLink>
+        </div>
+        <div class="navbar__blur" @click="toggleNavbar"></div>
       </div>
 
       <div class="user">
@@ -67,7 +70,7 @@ header {
     padding: 0 30px;
 
     .logo {
-      @include mq(m) {
+      @include mq(xl) {
         display: none;
       }
 
@@ -85,62 +88,70 @@ header {
     }
 
     .navbar {
-      display: flex;
-      gap: 15px;
-
-      @include mq(m) {
-        align-items: center;
-        justify-content: center;
-        flex-direction: column;
+      @include mq(xl) {
+        display: grid;
+        grid-template-columns: 70% 30%;
         position: absolute;
         z-index: 9999;
-        gap: 0;
         top: 80px;
         left: 0;
-        background-color: #333333;
-        width: 300px;
+        width: 100%;
+        height: 100%;
         transform: translateX(-100%)
       }
 
-      &__routes {
-        @include textNone($txt-gray);
-        padding: 26px 5px;
-        transition: .1s;
+      &__content {
+        display: flex;
+        gap: 15px;
 
-
-        border: {
-          top: 4px solid #222222;
-          bottom: 4px solid #222222;
+        @include mq(xl) {
+          flex-direction: column;
+          gap: 0;
+          background-color: #222222;
         }
 
-        @include mq(m) {
-          width: 100%;
-          text-align: center;
+        &__routes {
+          @include textNone($txt-gray);
+          padding: 26px 5px;
+          transition: .1s;
+
 
           border: {
-            top: 4px solid #333333;
-            bottom: 4px solid #333333;
+            top: 4px solid #222222;
+            bottom: 4px solid #222222;
           }
-        }
 
-        &:hover {
-          color: white;
-          border-bottom: 4px solid bisque;
-        }
+          @include mq(xl) {
+            width: 100%;
+            text-align: center;
 
-        @include mq(m) {
-          color: white;
-          padding: 30px;
+            border: {
+              top: 4px solid #222222;
+              bottom: 4px solid #222222;
+            }
+          }
 
           &:hover {
-            color: $txt-gray;
+            color: white;
+            border-bottom: 4px solid bisque;
+          }
+
+          @include mq(xl) {
+            color: white;
+            padding: 30px;
+
+            &:hover {
+              color: $txt-gray;
+            }
           }
         }
       }
     }
 
     .navbar--active {
-      transform: translateX(0);
+      animation-name: slide-bar;
+      animation-duration: .3s;
+      animation-fill-mode: forwards;
     }
 
     .user {
@@ -155,7 +166,6 @@ header {
       }
 
       &__signup {
-
         a {
           @include txtUser(rgb(141, 103, 58));
           border-radius: 8px;
@@ -173,7 +183,7 @@ header {
     .mobilebox {
       display: none;
 
-      @include mq(m) {
+      @include mq(xl) {
         display: flex;
         align-items: center;
         gap: 15px;
@@ -182,6 +192,8 @@ header {
       .mobilebar {
         display: flex;
         flex-direction: column;
+        justify-content: center;
+        align-items: center;
         gap: 6px;
 
         div {

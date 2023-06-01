@@ -16,6 +16,13 @@ $breath-btn: #00d3d3;
 $stop-btn: #ce0000;
 $side-color: #9c528b;
 
+// Animations
+@keyframes slide-bar {
+  100% {
+    transform: translateX(0);
+  }
+}
+
 // Fonts
 $main-font: "Roboto", sans-serif;
 $brand-font: "Tsukimi Rounded";
