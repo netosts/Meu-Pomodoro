@@ -172,6 +172,18 @@ watchEffect(() => {
     font-size: 120px;
     @include userNone();
     transition: .5s;
+
+    @include mq(s-m) {
+      width: 350px;
+      height: 180px;
+      font-size: 100px;
+    }
+
+    @include mq(xs-s) {
+      width: 300px;
+      height: 170px;
+      font-size: 90px;
+    }
   }
 
   &__breath {
@@ -184,8 +196,20 @@ watchEffect(() => {
     }
 
     background-color: $breath-btn;
-    font-size: 90px;
+    font-size: 100px;
     @include userNone();
+
+    @include mq(s-m) {
+      width: 300px;
+      height: 180px;
+      font-size: 95px;
+    }
+
+    @include mq(xs-s) {
+      width: 270px;
+      height: 160px;
+      font-size: 90px;
+    }
   }
 }
 
