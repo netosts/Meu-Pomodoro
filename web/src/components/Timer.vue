@@ -83,7 +83,7 @@ function startTimer() {
       resetTimer();
       sendNotification(); // notify user that focus time has begun
     }
-  }, 1000);
+  }, 10);
   isTimerActive.value = true;
 };
 
@@ -121,6 +121,14 @@ watchEffect(() => {
   const breathMinutes = Math.floor(breathRemainingTime.value / 60).toString().padStart(2, '0'); // Show minutes as two numbers always
   const breathSeconds = (breathRemainingTime.value % 60).toString().padStart(2, '0'); // Show seconds as two numbers always
   breathTimer.value = `${breathMinutes}:${breathSeconds}`;
+
+  // Update document title
+  setTimeout(() => {
+    if (isTimerActive.value) {
+      const remainingTime = isMainActive.value ? mainTimer.value : breathTimer.value;
+      document.title = `${remainingTime} - ${isMainActive.value ? 'FOCUS' : 'BREATH'}`
+    }
+  }, 1000)
 });
 </script>
 
