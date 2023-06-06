@@ -34,9 +34,10 @@ function toggleNavbar() {
 
       <div class="navbar" :class="navbar">
         <div class="navbar__content">
-          <RouterLink to="/" class="navbar__content__routes">Home</RouterLink>
-          <RouterLink to="/pomodoro" class="navbar__content__routes">Saiba mais</RouterLink>
-          <RouterLink to="/sobre" class="navbar__content__routes">Quem somos</RouterLink>
+          <RouterLink to="/" class="navbar__content__routes" @click="toggleNavbar">Home</RouterLink>
+          <RouterLink to="/personalizar" class="navbar__content__routes" @click="toggleNavbar">Personalizar</RouterLink>
+          <RouterLink to="/pomodoro" class="navbar__content__routes" @click="toggleNavbar">Saiba mais</RouterLink>
+          <RouterLink to="/sobre" class="navbar__content__routes" @click="toggleNavbar">Quem somos</RouterLink>
         </div>
         <div class="navbar__blur" @click="toggleNavbar"></div>
       </div>

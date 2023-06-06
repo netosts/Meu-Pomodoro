@@ -1,15 +1,34 @@
 <script setup>
-import { ref, watchEffect } from 'vue';
+import { ref, watchEffect, computed } from 'vue';
 import { setTimeout, setInterval, clearInterval } from 'worker-timers';
 
+
+// Local Storage Pomodoro Config
+const defaultConfig = {
+  mainTime: 25,
+  breathTime: 5,
+  addTime: 5,
+  turns: 4,
+};
+
+if (!localStorage.getItem('PomodoroConfig')) {
+  localStorage.setItem("PomodoroConfig", JSON.stringify(defaultConfig))
+}
+
+// get the local storage values
+const mainTimeValue = JSON.parse(localStorage.getItem('PomodoroConfig')).mainTime;
+const breathTimeValue = JSON.parse(localStorage.getItem('PomodoroConfig')).breathTime;
+const addTimeValue = JSON.parse(localStorage.getItem('PomodoroConfig')).addTime;
+const turnsValue = JSON.parse(localStorage.getItem('PomodoroConfig')).turns;
 
 // get the main and breath timers
 const mainTimer = ref(0);
 const breathTimer = ref(0);
 
 // set the main and breath timers remain times
-const mainRemainingTime = ref(1500); // 1500 seconds = 25 minutes
-const breathRemainingTime = ref(300); // 300 seconds = 5 minutes
+const mainRemainingTime = ref(mainTimeValue * 60); // 1500 seconds = 25 minutes
+const breathRemainingTime = ref(breathTimeValue * 60); // 300 seconds = 5 minutes
+const addMainTime = ref(addTimeValue * 60);
 
 // get the timers active booleans for conditional interactions
 const isTimerActive = ref(false);
@@ -21,7 +40,6 @@ let intervalId = null;
 
 // get the turn counter
 const turnCount = ref(1);
-
 
 // Notification functions
 function askPermission() {
@@ -38,11 +56,17 @@ function askPermission() {
 
 function sendNotification() {
   // Notification options and send the notification
-  const options = {
+  const nextState = {
     body: `Rodada #${turnCount.value} - ${isMainActive.value ? 'BREATH - Clique para adicionar 5 minutos de FOCUS' : 'FOCUS'}`,
     icon: '/seu-pomodoro-icon.png',
   }
-  const notification = new Notification('Seu Pomodoro', options)
+  const endState = {
+    body: `${isBreathActive.value ? 'Seu Pomodoro chegou ao fim.' : 'Ultima Rodada - BREATH - Clique para adicionar 5 minutos de FOCUS'}`,
+  }
+  const notification = new Notification('Seu Pomodoro', {
+    body: turnCount.value < turnsValue ? nextState.body : endState.body,
+    icon: nextState.icon,
+  })
   new Audio("/triangle-open.mp3").play();
   // notification closes after 10 seconds
   setTimeout(() => {
@@ -52,7 +76,7 @@ function sendNotification() {
   notification.onclick = (event) => {
     event.preventDefault();
     if (mainRemainingTime.value === 0) {
-      mainRemainingTime.value = 300;
+      mainRemainingTime.value = addMainTime.value;
       isBreathActive.value = false;
     }
   }
@@ -60,6 +84,8 @@ function sendNotification() {
 
 
 // Timer functions
+const canStartTimer = ref(true); // enable start button condition
+
 function startTimer() {
   // check if user has not granted permission for notification <- IMPORTANT
   // if not, alert the user and ask for permission
@@ -70,18 +96,22 @@ function startTimer() {
   // this is the timer function with web worker setInterval
   intervalId = setInterval(() => {
     if (mainRemainingTime.value > 1) {
-      mainRemainingTime.value--;
       isMainActive.value = true;
+      mainRemainingTime.value--;
     } else if (mainRemainingTime.value === 1) {
       sendNotification(); // notify user that breath time has begun
       mainRemainingTime.value--;
     } else if (breathRemainingTime.value > 0) {
-      breathRemainingTime.value--;
       isMainActive.value = false;
       isBreathActive.value = true;
-    } else {
+      breathRemainingTime.value--;
+    } else if (turnCount.value < turnsValue) {
       resetTimer();
       sendNotification(); // notify user that focus time has begun
+    } else {
+      canStartTimer.value = false; // Disable start button when timer ends
+      sendNotification(); // notify user that time has ended
+      stopTimer()
     }
   }, 10);
   isTimerActive.value = true;
@@ -95,20 +125,21 @@ function stopTimer() {
 };
 
 function resetTimer() { // soft reset for new turn
-  mainRemainingTime.value = 1500;
-  breathRemainingTime.value = 300;
   isMainActive.value = false;
   isBreathActive.value = false;
+  mainRemainingTime.value = 1500;
+  breathRemainingTime.value = 300;
   turnCount.value++;
 }
 
 function hardResetTimer() { // hard reset to restart timer and turns
-  mainRemainingTime.value = 1500;
-  breathRemainingTime.value = 300;
   isTimerActive.value = false;
   isMainActive.value = false;
   isBreathActive.value = false;
+  mainRemainingTime.value = 1500;
+  breathRemainingTime.value = 300;
   turnCount.value = 1;
+  canStartTimer.value = true; // re-enable start button
 }
 
 watchEffect(() => {
@@ -123,12 +154,10 @@ watchEffect(() => {
   breathTimer.value = `${breathMinutes}:${breathSeconds}`;
 
   // Update document title
-  setTimeout(() => {
-    if (isTimerActive.value) {
-      const remainingTime = isMainActive.value ? mainTimer.value : breathTimer.value;
-      document.title = `${remainingTime} - ${isMainActive.value ? 'FOCUS' : 'BREATH'}`
-    }
-  }, 1000)
+  if (isMainActive.value || isBreathActive.value) {
+    const remainingTime = isMainActive.value ? mainTimer.value : breathTimer.value;
+    document.title = `${remainingTime} - ${isMainActive.value ? 'FOCUS' : 'BREATH'}`
+  }
 });
 </script>
 
@@ -144,15 +173,18 @@ watchEffect(() => {
       </h3>
     </div>
     <div class="btn">
-      <button class="btn__start" v-show="!isTimerActive" @click="startTimer">
+      <button class="btn__start" v-show="!isTimerActive" @click="startTimer" :disabled="!canStartTimer">
         Start <font-awesome-icon icon="fa-solid fa-play" />
       </button>
       <button class="btn__stop" v-show="isTimerActive" @click="stopTimer">
         Pause <font-awesome-icon icon="fa-solid fa-pause" />
       </button>
       <button class="btn__reset" @click="hardResetTimer">
-        <font-awesome-icon icon="fa-solid fa-rotate" flip="horizontal" size="2xl" style="color: #333" />
+        <font-awesome-icon icon="fa-solid fa-rotate" flip="horizontal" size="2xl" style="color: #444" />
       </button>
+      <RouterLink to="/personalizar" class="btn__config">
+        <font-awesome-icon icon="fa-solid fa-gear" style="color: #444" size="2xl" />
+      </RouterLink>
     </div>
   </section>
 </template>
@@ -165,7 +197,6 @@ watchEffect(() => {
 .timer__title {
   font-family: 'Pacifico';
   font-size: 2rem;
-  font-weight: 900;
   padding: 5px 50px;
   color: #444444;
 }
@@ -274,6 +305,27 @@ watchEffect(() => {
 
     &:hover {
       cursor: pointer;
+    }
+
+    .fa-rotate {
+      transition: .35s;
+
+      &:hover {
+        filter: brightness(0.0);
+      }
+    }
+  }
+
+  &__config {
+    margin-left: 5px;
+
+    .fa-gear {
+      width: 30px;
+      transition: .35s;
+
+      &:hover {
+        filter: brightness(0.6);
+      }
     }
   }
 }

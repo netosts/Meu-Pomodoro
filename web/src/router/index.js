@@ -10,26 +10,50 @@ const router = createRouter({
       component: HomeView
     },
     {
-      path: '/sobre',
-      name: 'sobre',
-      component: () => import('../views/SobreView.vue')
+      path: '/personalizar',
+      name: 'personalizar',
+      component: () => import('../views/PersonalizarView.vue'),
+      meta: {
+        title: 'Personalizar Pomodoro'
+      }
     },
     {
       path: '/pomodoro',
       name: 'pomodoro',
-      component: () => import('../views/PomodoroView.vue')
+      component: () => import('../views/PomodoroView.vue'),
+      meta: {
+        title: 'Estudos sobre Pomodoro'
+      }
     },
     {
-      path: '/cadastro',
-      name: 'cadastro',
-      component: () => import('../views/CadastroView.vue')
+      path: '/sobre',
+      name: 'sobre',
+      component: () => import('../views/SobreView.vue'),
+      meta: {
+        title: 'Quem somos'
+      }
     },
     {
       path: '/entrar',
       name: 'entrar',
-      component: () => import('../views/EntrarView.vue')
-    }
+      component: () => import('../views/EntrarView.vue'),
+      meta: {
+        title: 'Entrar na conta'
+      }
+    },
+    {
+      path: '/cadastro',
+      name: 'cadastro',
+      component: () => import('../views/CadastroView.vue'),
+      meta: {
+        title: 'Criar uma conta'
+      }
+    },
   ]
+})
+
+router.beforeEach((to, from) => {
+  document.title = to.meta?.title ?? 'Seu Pomodoro';
 })
 
 export default router
