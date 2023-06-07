@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watchEffect, computed } from 'vue';
+import { ref, watchEffect } from 'vue';
 import { setTimeout, setInterval, clearInterval } from 'worker-timers';
 
 
@@ -7,8 +7,9 @@ import { setTimeout, setInterval, clearInterval } from 'worker-timers';
 const defaultConfig = {
   mainTime: 25,
   breathTime: 5,
+  longBreakTime: 15,
   addTime: 5,
-  turns: 4,
+  turns: 8,
 };
 
 if (!localStorage.getItem('PomodoroConfig')) {
@@ -18,6 +19,7 @@ if (!localStorage.getItem('PomodoroConfig')) {
 // get the local storage values
 const mainTimeValue = JSON.parse(localStorage.getItem('PomodoroConfig')).mainTime;
 const breathTimeValue = JSON.parse(localStorage.getItem('PomodoroConfig')).breathTime;
+const longBreakTimeValue = JSON.parse(localStorage.getItem('PomodoroConfig')).longBreakTime;
 const addTimeValue = JSON.parse(localStorage.getItem('PomodoroConfig')).addTime;
 const turnsValue = JSON.parse(localStorage.getItem('PomodoroConfig')).turns;
 
@@ -28,6 +30,7 @@ const breathTimer = ref(0);
 // set the main and breath timers remain times
 const mainRemainingTime = ref(mainTimeValue * 60); // 1500 seconds = 25 minutes
 const breathRemainingTime = ref(breathTimeValue * 60); // 300 seconds = 5 minutes
+const longBreakRemainingTime = ref(longBreakTimeValue * 60);
 const addMainTime = ref(addTimeValue * 60);
 
 // get the timers active booleans for conditional interactions
@@ -57,14 +60,14 @@ function askPermission() {
 function sendNotification() {
   // Notification options and send the notification
   const nextState = {
-    body: `Rodada #${turnCount.value} - ${isMainActive.value ? 'BREATH - Clique para adicionar 5 minutos de FOCUS' : 'FOCUS'}`,
+    body: `${turnCount.value < turnsValue ? 'Rodada #' + turnCount.value : 'Ultima Rodada'} - ${isMainActive.value ? 'BREATH - Clique para adicionar 5 minutos de FOCUS' : 'FOCUS'}`,
     icon: '/seu-pomodoro-icon.png',
   }
   const endState = {
-    body: `${isBreathActive.value ? 'Seu Pomodoro chegou ao fim.' : 'Ultima Rodada - BREATH - Clique para adicionar 5 minutos de FOCUS'}`,
+    body: `Seu Pomodoro chegou ao fim.`,
   }
   const notification = new Notification('Seu Pomodoro', {
-    body: turnCount.value < turnsValue ? nextState.body : endState.body,
+    body: canStartTimer.value ? nextState.body : endState.body,
     icon: nextState.icon,
   })
   new Audio("/triangle-open.mp3").play();
@@ -90,7 +93,7 @@ function startTimer() {
   // check if user has not granted permission for notification <- IMPORTANT
   // if not, alert the user and ask for permission
   if (Notification.permission !== 'granted') {
-    alert('Notificação desativada! Lembre de ativar para ser avisado sobre o pomodoro <-');
+    alert('Notificação desativada! Lembre de ativar para ser avisado sobre o Pomodoro!');
     askPermission();
   }
   // this is the timer function with web worker setInterval
@@ -113,7 +116,7 @@ function startTimer() {
       sendNotification(); // notify user that time has ended
       stopTimer()
     }
-  }, 10);
+  }, 1000);
   isTimerActive.value = true;
 };
 
@@ -127,8 +130,12 @@ function stopTimer() {
 function resetTimer() { // soft reset for new turn
   isMainActive.value = false;
   isBreathActive.value = false;
-  mainRemainingTime.value = 1500;
-  breathRemainingTime.value = 300;
+  mainRemainingTime.value = mainTimeValue * 60;
+  if (turnCount.value < 4) {
+    breathRemainingTime.value = breathTimeValue * 60;
+  } else {
+    breathRemainingTime.value = longBreakRemainingTime.value
+  }
   turnCount.value++;
 }
 
@@ -136,8 +143,8 @@ function hardResetTimer() { // hard reset to restart timer and turns
   isTimerActive.value = false;
   isMainActive.value = false;
   isBreathActive.value = false;
-  mainRemainingTime.value = 1500;
-  breathRemainingTime.value = 300;
+  mainRemainingTime.value = mainTimeValue * 60;
+  breathRemainingTime.value = breathTimeValue * 60;
   turnCount.value = 1;
   canStartTimer.value = true; // re-enable start button
 }
@@ -163,7 +170,7 @@ watchEffect(() => {
 
 <template>
   <section>
-    <h1 class="timer__title">Rodada # {{ turnCount }}</h1>
+    <h1 class="timer__title">Rodada # {{ turnCount }} <span class="timer__title__slash">/</span> {{ turnsValue }}</h1>
     <div class="timer">
       <h2 class="timer__main" :id="isMainActive ? 'timer__main--active' : null">
         {{ mainTimer }}
@@ -199,6 +206,11 @@ watchEffect(() => {
   font-size: 2rem;
   padding: 5px 50px;
   color: #444444;
+
+  &__slash {
+    font-family: 'Pacifico';
+    font-size: 1.4rem;
+  }
 }
 
 .timer {
