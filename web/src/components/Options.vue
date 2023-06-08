@@ -22,9 +22,10 @@ try {
     longBreakTime: 15,
     addTime: 5,
     turns: 8,
+    audio: 'harp-motif',
   };
 }
-let { mainTime, breathTime, longBreakTime, addTime, turns } = config;
+let { mainTime, breathTime, longBreakTime, addTime, turns, audio } = config;
 
 // update the pomodoro config in local storage after submit
 async function updateConfig() {
@@ -37,6 +38,7 @@ async function updateConfig() {
     longBreakTime,
     addTime,
     turns,
+    audio,
   };
   // handle error occurring during the submission process
   try {
@@ -66,6 +68,7 @@ async function resetConfig() {
     longBreakTime: 15,
     addTime: 5,
     turns: 8,
+    audio: 'harp-motif',
   };
   // handle error occurring during the reset
   try {
@@ -81,6 +84,7 @@ async function resetConfig() {
     longBreakTime = defaultConfig.longBreakTime;
     addTime = defaultConfig.addTime;
     turns = defaultConfig.turns;
+    audio = defaultConfig.audio;
   } catch (error) { // if error occurs
     isSubmitting.value = false;
     // show error message
@@ -94,6 +98,14 @@ const delay = (ms) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 // await delay(3000); // Wait for 3 seconds // Need async function to work
+
+// play audio when selected
+function playAudio() {
+  if (audio !== 'none') {
+    var audioElement = new Audio(`/${audio}.mp3`);
+    audioElement.play();
+  }
+}
 </script>
 
 <template>
@@ -124,6 +136,15 @@ const delay = (ms) => {
         <label for="turns">Rodadas</label>
         <input type="number" v-model="turns" name="turns" id="turns" min="1" max="24"
           :class="isSubmitted ? 'submitted' : 'unsubmitted'">
+      </div>
+      <div>
+        <label for="audio">Audio</label>
+        <select id="audio" v-model="audio" @change="playAudio">
+          <option value="harp-motif">Harp</option>
+          <option value="achieve-sound">Achieve</option>
+          <option value="triangle-open">Triangle</option>
+          <option value="none">Nenhum</option>
+        </select>
       </div>
       <div class="submit">
         <input type="submit" value="Confirmar mudança" :class="isSubmitted ? 'submitted' : 'unsubmitted'">

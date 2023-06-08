@@ -10,6 +10,7 @@ const defaultConfig = {
   longBreakTime: 15,
   addTime: 5,
   turns: 8,
+  audio: 'harp-motif',
 };
 
 if (!localStorage.getItem('PomodoroConfig')) {
@@ -17,21 +18,24 @@ if (!localStorage.getItem('PomodoroConfig')) {
 }
 
 // get the local storage values
-const mainTimeValue = JSON.parse(localStorage.getItem('PomodoroConfig')).mainTime;
-const breathTimeValue = JSON.parse(localStorage.getItem('PomodoroConfig')).breathTime;
-const longBreakTimeValue = JSON.parse(localStorage.getItem('PomodoroConfig')).longBreakTime;
-const addTimeValue = JSON.parse(localStorage.getItem('PomodoroConfig')).addTime;
-const turnsValue = JSON.parse(localStorage.getItem('PomodoroConfig')).turns;
+let config = null;
+try {
+  config = JSON.parse(localStorage.getItem('PomodoroConfig'));
+} catch (error) {
+  console.error(`Error occurred while parsing local storage config: ${error}`);
+  config = defaultConfig;
+}
+const { mainTime, breathTime, longBreakTime, addTime, turns, audio } = config;
 
 // get the main and breath timers
 const mainTimer = ref(0);
 const breathTimer = ref(0);
 
 // set the main and breath timers remain times
-const mainRemainingTime = ref(mainTimeValue * 60); // 1500 seconds = 25 minutes
-const breathRemainingTime = ref(breathTimeValue * 60); // 300 seconds = 5 minutes
-const longBreakRemainingTime = ref(longBreakTimeValue * 60);
-const addMainTime = ref(addTimeValue * 60);
+const mainRemainingTime = ref(mainTime * 60); // 1500 seconds = 25 minutes
+const breathRemainingTime = ref(breathTime * 60); // 300 seconds = 5 minutes
+const longBreakRemainingTime = ref(longBreakTime * 60);
+const addMainTime = ref(addTime * 60);
 
 // get the timers active booleans for conditional interactions
 const isTimerActive = ref(false);
@@ -60,7 +64,7 @@ function askPermission() {
 function sendNotification() {
   // Notification options and send the notification
   const nextState = {
-    body: `${turnCount.value < turnsValue ? 'Rodada #' + turnCount.value : 'Ultima Rodada'} - ${isMainActive.value ? 'BREATH - Clique para adicionar 5 minutos de FOCUS' : 'FOCUS'}`,
+    body: `${turnCount.value < turns ? 'Rodada #' + turnCount.value : 'Ultima Rodada'} - ${isMainActive.value ? 'BREATH - Clique para adicionar 5 minutos de FOCUS' : 'FOCUS'}`,
     icon: '/seu-pomodoro-icon.png',
   }
   const endState = {
@@ -70,7 +74,10 @@ function sendNotification() {
     body: canStartTimer.value ? nextState.body : endState.body,
     icon: nextState.icon,
   })
-  new Audio("/triangle-open.mp3").play();
+  if (audio !== 'none') {
+    const audioElement = new Audio(`/${audio}.mp3`);
+    audioElement.play();
+  }
   // notification closes after 10 seconds
   setTimeout(() => {
     notification.close();
@@ -108,7 +115,7 @@ function startTimer() {
       isMainActive.value = false;
       isBreathActive.value = true;
       breathRemainingTime.value--;
-    } else if (turnCount.value < turnsValue) {
+    } else if (turnCount.value < turns) {
       resetTimer();
       sendNotification(); // notify user that focus time has begun
     } else {
@@ -130,9 +137,9 @@ function stopTimer() {
 function resetTimer() { // soft reset for new turn
   isMainActive.value = false;
   isBreathActive.value = false;
-  mainRemainingTime.value = mainTimeValue * 60;
+  mainRemainingTime.value = mainTime * 60;
   if (turnCount.value < 4) {
-    breathRemainingTime.value = breathTimeValue * 60;
+    breathRemainingTime.value = breathTime * 60;
   } else {
     breathRemainingTime.value = longBreakRemainingTime.value
   }
@@ -143,8 +150,8 @@ function hardResetTimer() { // hard reset to restart timer and turns
   isTimerActive.value = false;
   isMainActive.value = false;
   isBreathActive.value = false;
-  mainRemainingTime.value = mainTimeValue * 60;
-  breathRemainingTime.value = breathTimeValue * 60;
+  mainRemainingTime.value = mainTime * 60;
+  breathRemainingTime.value = breathTime * 60;
   turnCount.value = 1;
   canStartTimer.value = true; // re-enable start button
 }
@@ -170,7 +177,7 @@ watchEffect(() => {
 
 <template>
   <section>
-    <h1 class="timer__title">Rodada # {{ turnCount }} <span class="timer__title__slash">/</span> {{ turnsValue }}</h1>
+    <h1 class="timer__title">Rodada # {{ turnCount }} <span class="timer__title__slash">/</span> {{ turns }}</h1>
     <div class="timer">
       <h2 class="timer__main" :id="isMainActive ? 'timer__main--active' : null">
         {{ mainTimer }}
@@ -194,6 +201,12 @@ watchEffect(() => {
       </RouterLink>
     </div>
   </section>
+
+  <aside>
+    <p>
+      Made by <a href="http://netosts.com/" target="_blank" rel="noopener">Neto Santos</a>
+    </p>
+  </aside>
 </template>
 
 <style lang="scss" scoped>
@@ -338,6 +351,23 @@ watchEffect(() => {
       &:hover {
         filter: brightness(0.6);
       }
+    }
+  }
+}
+
+aside {
+  margin-top: 70px;
+
+  p {
+    font-size: 14px;
+    font-weight: 300;
+    color: #444444;
+
+    a {
+      font-size: 16px;
+      font-weight: 600;
+      text-decoration: none;
+      color: #444444;
     }
   }
 }
