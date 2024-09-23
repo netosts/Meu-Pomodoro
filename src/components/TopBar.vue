@@ -1,15 +1,14 @@
 <script setup>
-import { RouterLink } from 'vue-router'
-import { ref } from 'vue'
+import { RouterLink } from "vue-router";
+import { ref } from "vue";
 
-
-const navbar = ref('')
+const navbar = ref("");
 
 function toggleNavbar() {
-  if (navbar.value === '') {
-    navbar.value = 'navbar--active'
+  if (navbar.value === "") {
+    navbar.value = "navbar--active";
   } else {
-    navbar.value = ''
+    navbar.value = "";
   }
 }
 </script>
@@ -28,16 +27,26 @@ function toggleNavbar() {
           <div class="line__3"></div>
         </div>
         <a href="#" class="mobilelogo">
-          <img src="/seu-pomodoro-icon.png" alt="seu pomodoro icon">
+          <img src="/seu-pomodoro-icon.png" alt="seu pomodoro icon" />
         </a>
       </div>
 
       <div class="navbar" :class="navbar">
         <div class="navbar__content">
-          <RouterLink to="/" class="navbar__content__routes" @click="toggleNavbar">Home</RouterLink>
-          <RouterLink to="/personalizar" class="navbar__content__routes" @click="toggleNavbar">Personalizar</RouterLink>
-          <RouterLink to="/pomodoro" class="navbar__content__routes" @click="toggleNavbar">Saiba mais</RouterLink>
-          <RouterLink to="/sobre" class="navbar__content__routes" @click="toggleNavbar">Quem somos</RouterLink>
+          <RouterLink
+            to="/"
+            class="navbar__content__routes"
+            @click="toggleNavbar"
+            >Home</RouterLink
+          >
+          <RouterLink
+            to="/personalizar"
+            class="navbar__content__routes"
+            @click="toggleNavbar"
+            >Personalizar</RouterLink
+          >
+          <!-- <RouterLink to="/pomodoro" class="navbar__content__routes" @click="toggleNavbar">Saiba mais</RouterLink>
+          <RouterLink to="/sobre" class="navbar__content__routes" @click="toggleNavbar">Quem somos</RouterLink> -->
         </div>
         <div class="navbar__blur" @click="toggleNavbar"></div>
       </div>
@@ -55,8 +64,8 @@ function toggleNavbar() {
 </template>
 
 <style lang="scss" scoped>
-@import '../assets/mixins';
-@import '../assets/variables';
+@import "../assets/mixins";
+@import "../assets/variables";
 
 header {
   height: 80px;
@@ -76,7 +85,7 @@ header {
       }
 
       a {
-        font-family: 'Tsukimi Rounded';
+        font-family: "Tsukimi Rounded";
         font-size: 20px;
         font-weight: 500;
         text-transform: uppercase;
@@ -98,7 +107,7 @@ header {
         left: 0;
         width: 100%;
         height: 100%;
-        transform: translateX(-100%)
+        transform: translateX(-100%);
       }
 
       &__content {
@@ -114,8 +123,7 @@ header {
         &__routes {
           @include textNone($txt-gray);
           padding: 26px 5px;
-          transition: .1s;
-
+          transition: 0.1s;
 
           border: {
             top: 4px solid #222222;
@@ -151,7 +159,7 @@ header {
 
     .navbar--active {
       animation-name: slide-bar;
-      animation-duration: .3s;
+      animation-duration: 0.3s;
       animation-fill-mode: forwards;
     }
 
@@ -172,7 +180,7 @@ header {
           border-radius: 8px;
           background-color: bisque;
           padding: 10px;
-          transition: .35s;
+          transition: 0.35s;
 
           &:hover {
             background-color: rgb(192, 171, 146);
